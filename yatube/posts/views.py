@@ -124,7 +124,11 @@ def follow_index(request):
     return render(
         request,
         'posts/follow.html',
-        {'page_number': page_number, 'page_obj': page_obj, 'paginator': paginator}
+        {
+            'page_number': page_number,
+            'page_obj': page_obj,
+            'paginator': paginator
+        }
     )
 
 
