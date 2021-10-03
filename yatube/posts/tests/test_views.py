@@ -387,3 +387,24 @@ class FollowTest(TestCase):
                 user=self.user_follower).exists(),
             'Пользователь не может отписаться от автора'
         )
+
+    def test_followers_follow(self):
+        """Новая запись пользователя появляется в ленте тех,
+        кто на него подписан."""
+        response = self.authorized_follower.get(reverse('posts:follow_index'))
+        self.assertTrue(
+            self.authors_post in response.context['page_obj'],
+            'В ленте подписанного пользователя нет записей автора'
+        )
+
+    def test_unfollowers_follow(self):
+        """Новая запись пользователя появляется в ленте тех,
+        кто не появляется в ленте тех, кто не подписан."""
+        response = self.authorized_unfollower.get(reverse(
+            'posts:follow_index'
+        )
+        )
+        self.assertTrue(
+            self.authors_post not in response.context['page_obj'],
+            'В ленте неподписанного пользователя есть записи автора'
+        )
