@@ -8,7 +8,8 @@ from django.urls import reverse
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from posts.models import Group, Post
+from posts.models import Group, Post, Comment
+from posts.forms import PostForm
 
 User = get_user_model()
 
@@ -96,3 +97,50 @@ class PostCreateFormTests(TestCase):
             'posts:post_detail',
             kwargs={'post_id': self.post.id}
         ))
+
+
+class TestCommentCreate(TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.group = Group.objects.create(
+            title='Тестовая группа',
+            slug='test-slug',
+            description='Тестовое описания',
+        )
+        cls.post = Post.objects.create(
+            text='Текст',
+            author=User.objects.create_user(username='author'),
+
+        )
+        cls.comment = Comment.objects.create(
+            post=cls.post,
+            author=User.objects.create_user(username='commentator'),
+            text='текст',
+        )
+
+        cls.form = PostForm()
+
+    def setUp(self):
+        self.guest = Client()
+        self.user = User.objects.create_user(username='test')
+        self.authorized_client = Client()
+        self.authorized_client.force_login(self.user)
+
+    def test_create_comment(self):
+        """Тестирование формы комментариев"""
+        comments_counter = Comment.objects.count()
+        form_data = {
+            'text': 'Тестовый текст',
+        }
+
+        response_guest = self.guest.post(
+            reverse('posts:add_comment', kwargs={'post_id': self.post.id}),
+            data=form_data,
+            follow=True
+        )
+        self.assertRedirects(
+            response_guest, '/auth/login/?next=%2Fposts%2F1%2Fcomment'
+        )
+        self.assertEqual(Comment.objects.count(), comments_counter)

@@ -13,7 +13,7 @@ class StaticURLTests(TestCase):
 
     def test_homepage(self):
         response = self.guest_client.get('/')
-        self.assertEqual(response.status_code, HTTPStatus.OK.value)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
 
 class PostURLTests(TestCase):
@@ -57,10 +57,10 @@ class PostURLTests(TestCase):
 
     def test_http_status(self):
         list_html_status = {
-            '/': HTTPStatus.OK.value,
-            '/group/test_slug/': HTTPStatus.OK.value,
-            '/profile/testuser1/': HTTPStatus.OK.value,
-            '/posts/1/': HTTPStatus.OK.value,
+            '/': HTTPStatus.OK,
+            '/group/test_slug/': HTTPStatus.OK,
+            '/profile/testuser1/': HTTPStatus.OK,
+            '/posts/1/': HTTPStatus.OK,
         }
         for adress, status_code in list_html_status.items():
             with self.subTest(adress=adress):
@@ -70,29 +70,44 @@ class PostURLTests(TestCase):
     def test_http_status_404(self):
         adress_404 = '/unexisting_page/'
         response = self.guest_client.get(adress_404)
-        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND.value)
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
 
     def test_auth_available(self):
         adress_create = '/create/'
         response = self.authorized_client.get(adress_create)
-        self.assertEqual(response.status_code, HTTPStatus.OK.value)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_not_auth_available(self):
         adress_create = '/create/'
         response = self.guest_client.get(adress_create)
-        self.assertEqual(response.status_code, HTTPStatus.FOUND.value)
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
 
     def test_auth_author(self):
         adress_edit = '/posts/1/edit/'
         response = self.authorized_client.get(adress_edit)
-        self.assertEqual(response.status_code, HTTPStatus.OK.value)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_redirect_guest(self):
         adress_edit = '/posts/1/edit/'
         response = self.guest_client.get(adress_edit)
-        self.assertEqual(response.status_code, HTTPStatus.FOUND.value)
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
 
     def test_redirect_not_author(self):
         adress_edit = '/posts/2/edit/'
         response = self.authorized_client.get(adress_edit)
-        self.assertEqual(response.status_code, HTTPStatus.FOUND.value)
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+
+    def test_url_add_comment(self):
+        comment_page = '/posts/1/comment'
+        response = self.authorized_client.get(comment_page)
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+
+    def test_url_follow(self):
+        follow = '/profile/testuser1/follow'
+        response = self.authorized_client.get(follow)
+        self.assertEqual(response.status_code, HTTPStatus.MOVED_PERMANENTLY)
+
+    def test_url_unfollow(self):
+        unfollow = '/profile/testuser1/unfollow'
+        response = self.authorized_client.get(unfollow)
+        self.assertEqual(response.status_code, HTTPStatus.MOVED_PERMANENTLY)
