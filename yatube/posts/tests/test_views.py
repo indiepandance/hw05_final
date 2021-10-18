@@ -299,7 +299,7 @@ class CommentTest(TestCase):
         )
 
 
-class CashTest(TestCase):
+class CacheTest(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -309,29 +309,29 @@ class CashTest(TestCase):
         for num in range(1, number_of_posts + 1):
             Post.objects.create(
                 text=f'Текст поста № {num}',
-                author=CashTest.test_user
+                author=CacheTest.test_user
             )
 
     def test_index_page_cache(self):
         """Посты  хранятся в кэше и обновляются
             каждые 20 сек"""
-        response_start = CashTest.guest_client.get(
+        response_start = CacheTest.guest_client.get(
             reverse('posts:index') + '?page=2'
         )
         Post.objects.create(
             text='Новый пост',
-            author=CashTest.test_user
+            author=CacheTest.test_user
         )
-        response_cashe = CashTest.guest_client.get(
+        response_cache = CacheTest.guest_client.get(
             reverse('posts:index') + '?page=2'
         )
         cache.clear()
-        response_timeout = CashTest.guest_client.get(
+        response_timeout = CacheTest.guest_client.get(
             reverse('posts:index') + '?page=2'
         )
         self.assertEqual(
             response_start.content,
-            response_cashe.content,
+            response_cache.content,
             'Контент не был закеширован!')
         self.assertNotEqual(
             response_start.content,
